@@ -1,5 +1,5 @@
 locals {
-  service_name = format("service_%s_%s", var.name, var.environment)
+  service_name = format("service_%s", var.name)
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
@@ -33,7 +33,6 @@ resource "aws_lambda_function" "service_lambda" {
   environment {
     variables = merge({
       SERVICE = var.name
-      ENVIRONMENT : var.environment
     }, var.environment_variables)
   }
 
@@ -142,7 +141,7 @@ resource "aws_apigatewayv2_api" "service_apig" {
 
   }
 
-  tags = merge(var.tags, { Name = local.service_name, Environment = var.environment })
+  tags = merge(var.tags, { Name = local.service_name })
 
 }
 

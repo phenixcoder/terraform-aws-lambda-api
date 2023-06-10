@@ -18,11 +18,6 @@ variable "lambda_image" {
   description = "URI of your container image for this function"
 }
 
-variable "environment" {
-  type        = string
-  description = "Prefix environment to resources identifiers/names created by this module"
-}
-
 variable "environment_variables" {
   default     = {}
   type        = map(string)
