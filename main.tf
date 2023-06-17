@@ -107,6 +107,12 @@ resource "aws_iam_policy" "lambda_logging" {
 EOF
 }
 
+resource "aws_iam_role_policy_attachment" "additional_policy" {
+  count = var.additional_lambda_execution_policy ? 1 : 0
+  role       = aws_iam_role.iam_for_lambda.name
+  policy_arn = var.additional_lambda_execution_policy
+}
+
 resource "aws_iam_role_policy_attachment" "lambda_logs" {
   role       = aws_iam_role.iam_for_lambda.name
   policy_arn = aws_iam_policy.lambda_logging.arn
@@ -146,6 +152,7 @@ resource "aws_apigatewayv2_api" "service_apig" {
 }
 
 resource "aws_lambda_permission" "lambda_execute_permission" {
+
   statement_id  = "${local.service_name}_apig_execute_permission"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.service_lambda.function_name

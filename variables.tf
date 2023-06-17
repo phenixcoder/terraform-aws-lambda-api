@@ -17,6 +17,11 @@ variable "lambda_image" {
   default     = "045615149555.dkr.ecr.ap-southeast-2.amazonaws.com/lambda-container-service:latest"
   description = "URI of your container image for this function"
 }
+variable "additional_lambda_execution_policy" {
+  type        = string
+  default     = null
+  description = "ARN of additional policy you want to attatch to lambda execution role."
+}
 
 variable "environment_variables" {
   default     = {}
