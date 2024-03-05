@@ -18,7 +18,7 @@ variable "lambda_code_type" {
   description = "Type of code for lambda function. Can be either 'zip' or 'container'"
   validation {
     condition     = can(regex("^(zip|container)$", var.lambda_code_type))
-    error_message = "Must be one of: zip or container"
+    error_message = "Must be one of zip or container"
   }
 }
 
