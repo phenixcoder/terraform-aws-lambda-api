@@ -44,12 +44,7 @@ variable "lambda_image" {
 
 variable "additional_lambda_execution_policy" {
   type        = string
-  default     = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": []
-}
-EOF
+  default     = null
   description = "policy document json of policy you want to attatch to lambda execution role."
 }
 

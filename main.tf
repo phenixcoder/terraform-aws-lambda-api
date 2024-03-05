@@ -116,6 +116,7 @@ EOF
 }
 
 resource "aws_iam_policy" "additional_policy" {
+  count       = var.additional_lambda_execution_policy != null ? 1 : 0
   name        = "additional_policy_${local.service_name}"
   path        = "/"
   description = "IAM policy for additional permissions for lambda"
@@ -124,8 +125,9 @@ resource "aws_iam_policy" "additional_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "additional_policy" {
+  count      = var.additional_lambda_execution_policy != null ? 1 : 0
   role       = aws_iam_role.iam_for_lambda.name
-  policy_arn = aws_iam_policy.additional_policy.arn
+  policy_arn = aws_iam_policy.additional_policy[0].arn
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_logs" {
