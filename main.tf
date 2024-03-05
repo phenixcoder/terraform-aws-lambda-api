@@ -27,8 +27,16 @@ resource "aws_lambda_function" "service_lambda" {
   function_name = local.service_name
   role          = aws_iam_role.iam_for_lambda.arn
 
-  package_type = "Image"
-  image_uri    = var.lambda_image
+  package_type = var.lambda_code_type == "zip" ? "Zip" : "Image"
+
+  # If using container, image_uri is required
+  image_uri = var.lambda_code_type == "container" ? var.lambda_image : null
+
+  # If using zip, filename, source_code_hash, runtime and handler are required
+  filename         = var.lambda_code_type == "zip" ? var.lambda_code.path : null
+  source_code_hash = var.lambda_code_type == "zip" ? filebase64sha256(var.lambda_code.path) : null
+  runtime          = var.lambda_code_type == "zip" ? var.lambda_code.runtime : null
+  handler          = var.lambda_code_type == "zip" ? var.lambda_code.handler : null
 
   environment {
     variables = merge({

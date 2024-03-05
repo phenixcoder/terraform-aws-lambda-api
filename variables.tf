@@ -12,6 +12,30 @@ variable "domain" {
   default = null
 }
 
+variable "lambda_code_type" {
+  type        = string
+  default     = "container"
+  description = "Type of code for lambda function. Can be either 'zip' or 'container'"
+  validation {
+    condition     = can(regex("^(zip|container)$", var.lambda_code_type))
+    error_message = "Must be one of: zip or container"
+  }
+}
+
+variable "lambda_code" {
+  type = object({
+    path    = string
+    runtime = string
+    handler = string
+  })
+  default = {
+    path    = "payload.zip"
+    runtime = "nodejs20.x"
+    handler = "index.handler"
+  }
+  description = "Specification for code when using zip file as lambda code"
+}
+
 variable "lambda_image" {
   type        = string
   default     = "045615149555.dkr.ecr.ap-southeast-2.amazonaws.com/lambda-container-service:latest"
