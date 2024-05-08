@@ -1,5 +1,5 @@
 locals {
-  service_name = format("service_%s", var.name)
+  service_name = format("service_%s_%s", var.name, var.environment)
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
@@ -41,9 +41,11 @@ resource "aws_lambda_function" "service_lambda" {
   environment {
     variables = merge({
       SERVICE = var.name
+      ENVIRONMENT : var.environment
     }, var.environment_variables)
   }
 
+  timeout = 30
 
   depends_on = [
     aws_iam_role_policy_attachment.lambda_logs,
@@ -164,12 +166,11 @@ resource "aws_apigatewayv2_api" "service_apig" {
 
   }
 
-  tags = merge(var.tags, { Name = local.service_name })
+  tags = merge(var.tags, { Name = local.service_name, Environment = var.environment })
 
 }
 
 resource "aws_lambda_permission" "lambda_execute_permission" {
-
   statement_id  = "${local.service_name}_apig_execute_permission"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.service_lambda.function_name
@@ -287,4 +288,61 @@ resource "aws_route53_record" "api" {
     zone_id                = aws_apigatewayv2_domain_name.this[0].domain_name_configuration[0].hosted_zone_id
     evaluate_target_health = false
   }
+}
+
+# Outputs as SSM Parameters
+resource "aws_ssm_parameter" "endpoint" {
+  count = var.expose_outputs_to_parameters && var.parameter_prefix != "" ? 1 : 0
+
+  depends_on = [
+    aws_apigatewayv2_api.service_apig
+  ]
+
+  name  = "${var.parameter_prefix}/endpoint"
+  type  = "String"
+  value = tobool(var.domain == null) ? "${aws_apigatewayv2_api.service_apig.id}.execute-api.${data.aws_region.current.name}.amazonaws.com" : aws_apigatewayv2_domain_name.this[0].domain_name
+
+  tags = var.tags
+}
+
+resource "aws_ssm_parameter" "lambda" {
+  count = var.expose_outputs_to_parameters && var.parameter_prefix != "" ? 1 : 0
+
+  depends_on = [
+    aws_lambda_function.service_lambda
+  ]
+
+  name  = "${var.parameter_prefix}/lambda"
+  type  = "String"
+  value = aws_lambda_function.service_lambda.arn
+
+  tags = var.tags
+}
+
+resource "aws_ssm_parameter" "apig_endpoint" {
+  count = var.expose_outputs_to_parameters && var.parameter_prefix != "" ? 1 : 0
+
+  depends_on = [
+    aws_apigatewayv2_api.service_apig
+  ]
+
+  name  = "${var.parameter_prefix}/apig_endpoint"
+  type  = "String"
+  value = aws_apigatewayv2_api.service_apig.api_endpoint
+
+  tags = var.tags
+}
+
+resource "aws_ssm_parameter" "apig_arn" {
+  count = var.expose_outputs_to_parameters && var.parameter_prefix != "" ? 1 : 0
+
+  depends_on = [
+    aws_apigatewayv2_api.service_apig
+  ]
+
+  name  = "${var.parameter_prefix}/apig_arn"
+  type  = "String"
+  value = aws_apigatewayv2_api.service_apig.arn
+
+  tags = var.tags
 }

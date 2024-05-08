@@ -2,6 +2,10 @@ variable "name" {
   type        = string
   description = "Service Name"
 }
+variable "environment" {
+  type        = string
+  description = "Environment of the service"
+}
 
 variable "domain" {
   type = object({
@@ -64,4 +68,20 @@ variable "tags" {
   default     = {}
   type        = map(string)
   description = "Map of tags to be added to all the resources to be created by this module"
+}
+
+variable "expose_outputs_to_parameters" {
+  type        = bool
+  default     = false
+  description = "Expose the outputs of this module as parameters"
+}
+
+variable "parameter_prefix" {
+  type        = string
+  default     = ""
+  description = "Prefix to use for the parameters"
+  validation {
+    condition     = length(regex("^/[a-zA-Z0-9/_-]+$", var.parameter_prefix)) > 0 || var.parameter_prefix == ""
+    error_message = "The prefix can have alphabets and numbers with symbols (.-_) and no spaces. Must start with /"
+  }
 }

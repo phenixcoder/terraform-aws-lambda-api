@@ -13,6 +13,9 @@ output "apig_endpoint" {
 output "lambda_arn" {
   value = aws_lambda_function.service_lambda.arn
 }
+output "lambda_execution_role" {
+  value = aws_iam_role.iam_for_lambda.name
+}
 output "apig_arn" {
   value = aws_apigatewayv2_api.service_apig.arn
 }
