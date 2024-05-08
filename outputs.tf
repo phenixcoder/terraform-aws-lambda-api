@@ -19,3 +19,11 @@ output "lambda_execution_role" {
 output "apig_arn" {
   value = aws_apigatewayv2_api.service_apig.arn
 }
+output "exposed_params" {
+  value = var.expose_outputs_to_parameters && var.parameter_prefix != "" ? [
+    aws_ssm_parameter.endpoint[0].name,
+    aws_ssm_parameter.lambda[0].name,
+    aws_ssm_parameter.apig_endpoint[0].name,
+    aws_ssm_parameter.apig_arn[0].name
+  ] : []
+}
